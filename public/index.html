@@ -4,9 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <title>NDNts A-Frame and JSON patch demo</title>
-  <script src="/static/aframe.js"></script>
+  <!--<script src="/static/aframe.js"></script>-->
+  <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+  <script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js "></script>
   <script src="/static/bundle.js"></script>
   <script src="/static/aincraft.js"></script>
+  <script src="https://unpkg.com/three@0.126.1/examples/js/exporters/GLTFExporter.js"></script>
+  <script>
+    let boxCreationActive = false;
+    function toggleBoxCreation() {
+        boxCreationActive = !boxCreationActive;
+        const button = document.getElementById('toggleBoxButton');
+        if (boxCreationActive) {
+            button.style.backgroundColor = 'purple';
+        } else {
+            button.style.backgroundColor = 'gray';
+        }
+    }
+</script>
+
   <style>
     /* Style for the container holding the columns */
     .container {
@@ -33,6 +49,31 @@
       width: 100%;
     }
   </style>
+
+<style>
+  #modelListContainer {
+    width: 100%; /* 或者您希望的宽度 */
+    max-width: 300px; /* 最大宽度，可根据您的布局需要调整 */
+    margin: auto; /* 使得容器居中显示 */
+    border: 1px solid #ccc; /* 容器边框 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 添加轻微的阴影效果 */
+    padding: 10px; /* 容器内边距 */
+    box-sizing: border-box; /* 边框盒模型，边框和内边距的宽度不会影响容器的总宽度 */
+  }
+
+  #modelList {
+    width: 100%; /* 下拉菜单宽度占满容器宽度 */
+    height: auto; /* 自动高度，根据选项数量自动调整 */
+    padding: 5px; /* 下拉菜单内边距 */
+    border: 1px solid #ccc; /* 下拉菜单边框 */
+    box-sizing: border-box; /* 边框盒模型 */
+    -webkit-appearance: none; /* 移除webkit浏览器默认的外观 */
+    -moz-appearance: none; /* 移除Firefox默认的外观 */
+    appearance: none; /* 移除默认的外观 */
+  }
+
+</style>
+
 </head>
 
 <body>
@@ -46,22 +87,480 @@
     <div class="column">
       <a-scene id="root" embedded>
         <a-assets id="assets">
-          <img id="groundTexture" src="/static/floor.jpg" alt="">
-          <img id="skyTexture" src="/static/sky.jpg" alt="">
-          <a-mixin id="voxel" geometry="primitive: box; height: 0.5; width: 0.5; depth: 0.5"
+          <!--<img id="groundTexture" src="/static/floor.jpg" alt="">-->
+          <img id="groundTexture" src="/static/a-frame-assets/grass.jpg" alt="">
+          <!-- <img id="Top" src="/static/a-frame-assets/destination.jpg" alt=""> -->
+          <img id="sky" src="/static/a-frame-assets/sky.jpg" alt="">
+          <img id="objTexture" src="/static/a-frame-assets/floor.jpg" alt="">
+         <!-- <img id="skyTexture" src="/static/sky.jpg" alt=""> -->
+          <!--<a-mixin id="voxel" geometry="primitive: box; height: 0.5; width: 0.5; depth: 0.5"
             material="shader: standard">
-          </a-mixin>
+          </a-mixin>-->
+          <a-asset-item id="amsterdamm" src="/static/a-frame-assets/amsterdamm/amsterdamm.gltf"></a-asset-item>
+          <a-asset-item id="airbus700" src="/static/a-frame-assets/airbus700/airbus700.gltf"></a-asset-item>
+          <a-asset-item id="SheenChair" src="/static/a-frame-assets/SheenChair/SheenChair.gltf"></a-asset-item>
+          <a-asset-item id="gundammap" src="/static/a-frame-assets/gundammap/gundammap.gltf"></a-asset-item>
+          <a-asset-item id="test" src="/static/a-frame-assets/test/test.gltf"></a-asset-item>
+          <a-asset-item id="margarita_flower" src="/static/a-frame-assets/margarita_flower/margarita_flower.gltf"></a-asset-item>
+          <a-asset-item id="formulae" src="/static/a-frame-assets/formulae/formulae.gltf"></a-asset-item>	
+          <a-asset-item id="iconfontsolid" src="assets/fonts/fa-solid-900.ttf"></a-asset-item>
+          <a-asset-item id="iconfontbrand" src="assets/fonts/fa-brands-400.ttf"></a-asset-item>
+          <a-asset-item id="textfont1" src="assets/fonts/PermanentMarker-Regular.ttf"></a-asset-item>
+          <a-asset-item id="textfont2" src="assets/fonts/PressStart2P-Regular.ttf"></a-asset-item>	
+          <a-asset-item id="textfont3" src="assets/fonts/Plaster-Regular.ttf"></a-asset-item>
+          <a-asset-item id="textfont4" src="assets/fonts/DiplomataSC-Regular.ttf"></a-asset-item>	
         </a-assets>
-        <a-cylinder id="voxel" src="#groundTexture" radius="32" height="0.1"></a-cylinder>
-        <a-sky id="background" src="#skyTexture" radius="30" theta-length="90"></a-sky>
+        <!--<a-box id="voxel" depth="0.5" height="0.5" width="0.5" position="0 0 0"></a-box>-->
+        <!--<a-cylinder id="voxel" src="#groundTexture" radius="32" height="0.1"></a-cylinder>-->
+        <!--<a-entity gltf-model="#airbus700" position="0 0 0"></a-entity>-->
+        <a-cylinder id="voxel2" src="#groundTexture" radius="32" height="0.1"></a-cylinder>
+        <!--<a-sky id="background" src="#skyTexture" radius="30" theta-length="90"></a-sky>-->
+        <a-sky id="background" src="#sky" radius="30" theta-length="90"></a-sky>
         <a-camera id="camera">
           <a-cursor id="cursor"
-            intersection-spawn="event: click; offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5; mixin: voxel">
+           intersection-spawn="event: click; offset: 0.25 0.25 0.25; snap: 0.5 0.5 0.5"> 
           </a-cursor>
         </a-camera>
+
+        <a-gui-flex-container 
+        flex-direction="column" justify-content="center" align-items="middle" component-padding="0.1" opacity="0.7" width="3.5" height="3.4" 
+        panel-color="#59f2f7" 
+        panel-rounded="0.2"
+      position="0 2.5 -6" rotation="0 0 0"
+      id="panel"
+      visible="false"
+    >
+    <a-gui-label 
+    id="objID"
+    width="2.5" height="0.3"
+    font-size="0.2"
+    value="ID:"
+    margin="0 0 0.3 0"
+    font-color="#BF360C"
+    background-color="#FFCCBC"
+    >
+  </a-gui-label>
+
+    <a-gui-flex-container flex-direction="row"   align-items="normal" justify-content="center" component-padding="0.1" height="0.01" width="0.01" panel-color="#59f2f7"  margin="0 0 0.5 0">
+      <a-gui-label 
+      width="0.8" height="0.3"
+      font-size="0.2"
+      value="Scale"
+      margin="0 0.5 0.3 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      >
+    </a-gui-label>
+      <a-gui-input 
+        id="myInput"
+        width="1" height="0.3"
+        onclick="testInputAction"
+        margin="0 0 0.3 0"
+        value="Hello Wor_"
+        font-size="0.1"
+        font-color="#880E4F"
+        border-color="#880E4F"
+        border-hover-color="#AD1457"
+        background-color="#FCE4EC"
+        hover-color="#F8BBD0"
+        active-color="#F48FB1"
+      >
+      </a-gui-input>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row"   align-items="normal" justify-content="center" component-padding="0.1" height="0.01" width="0.01" panel-color="#59f2f7" margin="0 0 0.5 0">
+      <a-gui-label 
+      font-size="0.2"
+      width="0.8" height="0.3"
+      value="Position"
+      margin="0 0.5 0.3 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      >
+    </a-gui-label>
+      <a-gui-input 
+        id="myInput2"
+        width="1" height="0.3"
+        onclick="testInputAction2"
+        font-size="0.1"
+        margin="0 0 0.3 0"
+        value="Hello Wor_"
+        font-color="#880E4F"
+        border-color="#880E4F"
+        border-hover-color="#AD1457"
+        background-color="#FCE4EC"
+        hover-color="#F8BBD0"
+        active-color="#F48FB1"
+      >
+      </a-gui-input>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row"  align-items="normal" justify-content="center" component-padding="0.1" width="0.01" height="0.01" panel-color="#59f2f7" margin="0 0 0.5 0">
+      <a-gui-label 
+      id="sliderLabel"
+      width="0.8" height="0.3"
+      value="Color"
+      margin="0 0.5 0 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      
+      >
+    </a-gui-label>
+        <a-gui-slider 	
+      id="colorSlider"
+      width="1.5" height="0.3"
+      onclick="testSliderAction"
+      percent="0.23"
+      margin="0 0.3 0 0"
+      border-color="#C8E6C9"
+      background-color="#33691E"
+      hover-color="#2E7D32"
+      active-color="#FFEB3B"
+      handle-color="#33691E"
+      >
+      </a-gui-slider>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row"   align-items="normal" justify-content="center" component-padding="0.1" width="0.01" height="0.01" panel-color="#59f2f7" margin="0 0 0.6 0">
+      <a-gui-radio 
+       id="radio1"
+       toggle-state="false"
+          width="0.3" height="0.3"
+          onclick="testToggleAction"
+          value="Box"
+          font-size="0.1"
+          margin="0 0.5 0.5 0"
+          font-color="black"
+          border-color="#006064"
+          background-color="#E0F7FA"
+          hover-color="#00838F"
+          active-color="#FFEB3B"
+          handle-color="#00838F"
+        >
+        </a-gui-radio>
+    <a-gui-radio 
+    id="radio2"
+    toggle-state="false"
+          width="0.3" height="0.3"
+          onclick="testToggleAction2"
+          font-size="0.1"
+          value="Cydlinder"
+          margin="0 0.5 0.5 0"
+          font-color="black"
+          border-color="#006064"
+          background-color="#E0F7FA"
+          hover-color="#00838F"
+          active-color="#FFEB3B"
+          handle-color="#00838F"
+        >
+        </a-gui-radio>
+        <a-gui-radio
+        id="radio3" 
+        toggle-state="false"
+       width="0.3" height="0.3"
+       onclick="testToggleAction3"
+       font-size="0.1"
+       value="Sphere"
+       margin="0 0 0.5 0"
+       font-color="black"
+       border-color="#006064"
+       background-color="#E0F7FA"
+       hover-color="#00838F"
+       active-color="#FFEB3B"
+       handle-color="#00838F"
+     >
+     </a-gui-radio>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row" align-items="normal"  justify-content="center" component-padding="0.1" width="0.01" height="0.01" panel-color="#59f2f7">
+      <a-gui-button
+      width="1" 
+      height="0.3" 
+      base-depth="0.025" 
+      depth="0.1"
+      gap="0.1"
+    
+      onclick="buttonActionFunction" 
+      value="Confirm"
+      font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+      font-size="0.2"
+      margin="0 1 0 0"
+    
+      font-color="black"
+      active-color="red"
+      hover-color="yellow"
+      border-color="white"
+      focus-color="black"
+      background-color="orange"
+    
+      bevel="true"
+    >
+    </a-gui-button>
+    
+    <a-gui-button
+    width="1" 
+    height="0.3" 
+    base-depth="0.025" 
+    depth="0.1"
+    gap="0.1"
+    
+    onclick="buttonActionFunction2" 
+    value="Cancel"
+    font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+    font-size="0.2"
+    margin="0 0 0.05 0"
+    
+    font-color="black"
+    active-color="red"
+    hover-color="yellow"
+    border-color="white"
+    focus-color="black"
+    background-color="orange"
+    
+    bevel="true"
+    >
+    </a-gui-button>
+    </a-gui-flex-container>
+    </a-gui-flex-container>
+
+    <a-gui-flex-container 
+        flex-direction="column" justify-content="center" align-items="middle" component-padding="0.1" opacity="0.7" width="3.5" height="3.0" 
+        panel-color="#59f2f7" 
+        panel-rounded="0.2"
+      position="0 0 0" rotation="0 0 0"
+      id="panelModel"
+      visible="false"
+    >
+    <a-gui-label 
+    id="objIDModel"
+    width="2.5" height="0.3"
+    font-size="0.2"
+    value="ID:"
+    margin="0 0 0.3 0"
+    font-color="#BF360C"
+    background-color="#FFCCBC"
+    line-height="0.8"
+    gui-item geometry material gui-label position
+    >
+  </a-gui-label>
+
+    <a-gui-flex-container flex-direction="row"   align-items="normal" justify-content="center" component-padding="0.1" height="0.01" width="0.01" panel-color="#59f2f7"  margin="0 0 0.5 0">
+      <a-gui-label 
+      width="0.8" height="0.3"
+      font-size="0.2"
+      value="Scale"
+      margin="0 0.5 0.3 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      >
+    </a-gui-label>
+      <a-gui-input 
+        id="myInputModel"
+        width="1" height="0.3"
+        onclick="testInputAction"
+        margin="0 0 0.3 0"
+        value="Hello Wor_"
+        font-size="0.1"
+        font-color="#880E4F"
+        border-color="#880E4F"
+        border-hover-color="#AD1457"
+        background-color="#FCE4EC"
+        hover-color="#F8BBD0"
+        active-color="#F48FB1"
+      >
+      </a-gui-input>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row"   align-items="normal" justify-content="center" component-padding="0.1" height="0.01" width="0.01" panel-color="#59f2f7" margin="0 0 0.5 0">
+      <a-gui-label 
+      font-size="0.2"
+      width="0.8" height="0.3"
+      value="Position"
+      margin="0 0.5 0.3 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      >
+    </a-gui-label>
+      <a-gui-input 
+        id="myInput2Model"
+        width="1" height="0.3"
+        onclick="testInputAction2"
+        font-size="0.1"
+        margin="0 0 0.3 0"
+        value="Hello Wor_"
+        font-color="#880E4F"
+        border-color="#880E4F"
+        border-hover-color="#AD1457"
+        background-color="#FCE4EC"
+        hover-color="#F8BBD0"
+        active-color="#F48FB1"
+      >
+      </a-gui-input>
+    </a-gui-flex-container>
+    <a-gui-flex-container flex-direction="row"  align-items="normal" justify-content="center" component-padding="0.1" width="0.01" height="0.01" panel-color="#59f2f7" margin="0 0 0.6 0">
+      <a-gui-label 
+      width="0.8" height="0.3"
+      value="Texture"
+      margin="0 0.5 0 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC"
+      
+      >
+    </a-gui-label>
+    <a-gui-button
+		width="0.8" 
+		height="0.1" 
+		base-depth="0.025" 
+		depth="0.05"
+		gap="0.05"
+    id="textureButton"
+		onclick="buttonSelectionModel"
+		value="Select"
+		font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+		margin="0 0 0.05 0"
+
+		font-color="black"
+		active-color="red"
+		hover-color="pink"
+		border-color="white"
+		focus-color="black"
+		background-color="orange"
+
+		bevel="true"
+	>
+	</a-gui-button>
+    </a-gui-flex-container>
+   
+    <a-gui-flex-container flex-direction="row" align-items="normal"  justify-content="center" component-padding="0.1" width="0.01" height="0.01" panel-color="#59f2f7">
+      <a-gui-button
+      width="0.5" 
+      height="0.3" 
+      base-depth="0.025" 
+      depth="0.1"
+      gap="0.1"
+    
+      onclick="buttonActionFunction" 
+      value="Confirm"
+      font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+      font-size="0.1"
+      margin="0 0.5 0 0"
+    
+      font-color="black"
+      active-color="red"
+      hover-color="yellow"
+      border-color="white"
+      focus-color="black"
+      background-color="orange"
+    
+      bevel="true"
+    >
+    </a-gui-button>
+    
+    <a-gui-button
+    width="0.5" 
+    height="0.3" 
+    base-depth="0.025" 
+    depth="0.1"
+    gap="0.1"
+    
+    onclick="buttonActionFunction2" 
+    value="Cancel"
+    font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+    font-size="0.1"
+    margin="0 0.5 0.05 0"
+    
+    font-color="black"
+    active-color="red"
+    hover-color="yellow"
+    border-color="white"
+    focus-color="black"
+    background-color="orange"
+    
+    bevel="true"
+    >
+    </a-gui-button>
+
+    <a-gui-button
+      width="0.5" 
+      height="0.3" 
+      base-depth="0.025" 
+      depth="0.1"
+      gap="0.1"
+    
+      onclick="buttonActionFunction3" 
+      value="Delete"
+      font-family="assets/fonts/PermanentMarker-Regular.ttf"	
+      font-size="0.1"
+      margin="0 0 0 0"
+    
+      font-color="black"
+      active-color="red"
+      hover-color="yellow"
+      border-color="white"
+      focus-color="black"
+      background-color="orange"
+    
+      bevel="true"
+    >
+    </a-gui-button>
+    </a-gui-flex-container>
+    </a-gui-flex-container>
+
+    <a-gui-flex-container 
+    flex-direction="column" justify-content="center" align-items="middle" component-padding="0.1" opacity="0.7" width="2.5" height="1.5" 
+    panel-color="#59f2f7" 
+    panel-rounded="0.2"
+    position="0 1.6 -3" rotation="0 0 0"
+    id="materialSelector"
+    visible="false">
+    <a-gui-label 
+      width="2" height="0.3"
+      font-size="0.2"
+      value="Select Material"
+      margin="0 0 0.1 0"
+      font-color="#BF360C"
+      background-color="#FFCCBC">
+    </a-gui-label>
+    <a-gui-button
+      width="2" height="0.3"
+      value="Dark"
+      onclick="applyMaterial('Dark')"
+      margin="0 0 0.1 0">
+    </a-gui-button>
+    <a-gui-button
+      width="2" height="0.3"
+      value="Abstract"
+      onclick="applyMaterial('Abstract')"
+      margin="0 0 0.1 0">
+    </a-gui-button>
+    <a-gui-button
+      width="2" height="0.3"
+      value="Cyberpunk"
+      onclick="applyMaterial('Cyberpunk')">
+    </a-gui-button>
+  </a-gui-flex-container>
       </a-scene>
     </div>
   </div>
+  <div style="position: absolute; top: 500px; left: 80px;">
+    <button id="toggleBoxButton" onclick="toggleBoxCreation()" style="padding: 10px; background-color: gray; color: white; border: none; border-radius: 8px;">Box</button>
+    <br> <!-- 换行，使得标签位于按钮的下方 -->
+    <label style="padding: 10px; background-color: white; color: gray; border: none; border-radius: 8px;">Assets Library</label> <!-- 添加标签 -->
+    <select id="assetsLibrary" onchange="handleSelectionChange(this.value)" style="padding: 10px; border-radius: 8px; margin-left: 10px;"> <!-- margin-left为左边距，使得下拉菜单与标签之间有一些间距 -->
+        <option value="None">None</option>
+        <option value="SheenChair">SheenChair</option>
+        <option value="amsterdamm">amsterdamm</option>
+        <option value="gundammap">gundammap</option>
+        <option value="airbus700">airbus700</option>
+        <option value="margarita_flower">margarita_flower</option>
+        <option value="formulae">formulae</option>
+        <option value="test">test</option>
+    </select>
+</div>
+
+<div id="modelListContainer" style="position: absolute; top: 450px; left: 460px;">
+  <h3>Loaded Models</h3>
+  <select id="modelList" size="5">
+    <!-- 模型选项将通过JavaScript动态添加 -->
+  </select>
+</div>
+
+
 </body>
 
 </html>

@@ -116,6 +116,7 @@ export function createSync() {
 
 export async function produce(content: string, skipZeroFlag = false) {
   let seqNum = syncNode.seqNum + 1;
+  //console.log(`${seqNum}`);
   if (skipZeroFlag) {
     seqNum = 0;
   }
@@ -127,6 +128,8 @@ export async function produce(content: string, skipZeroFlag = false) {
   );
   await signer.sign(data);
   pktStorage[name.toString()] = data;
+  //console.log("pktStorage plug in"+name.toString());
+  //console.log(`${content}`);
   if (!skipZeroFlag) {
     syncNode.seqNum = seqNum;
   }
@@ -183,4 +186,9 @@ export async function scanQrCode(file: File) {
   } catch (error) {
     console.error(`Unable to parse QRCode due to error: ${error}`)
   }
+}
+
+export async function returnNodeId() {
+return nodeId;
+
 }
